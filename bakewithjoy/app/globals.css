@@ -1,8 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* Force standard dark text and white background without using @apply */
+/* This fixes the invisible text in dark mode */
 input, select, textarea {
   color: #111827 !important; 
   background-color: #ffffff !important;

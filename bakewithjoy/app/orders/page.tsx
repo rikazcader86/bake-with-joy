@@ -1,9 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
-import { collection, addDoc, onSnapshot, orderBy, query } from "firebase/firestore";
+import { collection, addDoc, onSnapshot, orderBy, query, doc, deleteDoc } from "firebase/firestore";
 import { db } from "../../firebase";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { Trash2 } from "lucide-react";
 
 export default function OrdersPage() {
   const [savedRecipes, setSavedRecipes] = useState<any[]>([]);
@@ -17,12 +18,10 @@ export default function OrdersPage() {
   const [profitMargin, setProfitMargin] = useState("40"); 
 
   useEffect(() => {
-    // Load recipes
     const unsubRecipes = onSnapshot(collection(db, "recipes"), (snapshot) => {
       setSavedRecipes(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
     
-    // Load past orders (newest first)
     const q = query(collection(db, "orders"), orderBy("date", "desc"));
     const unsubOrders = onSnapshot(q, (snapshot) => {
       setOrderHistory(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
@@ -64,26 +63,29 @@ export default function OrdersPage() {
     setPackagingCost("");
   };
 
-  // --- THIS IS THE NEW PDF GENERATOR FUNCTION ---
+  // NEW: Delete function for orders
+  const deleteOrder = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this order record?")) {
+      await deleteDoc(doc(db, "orders", id));
+    }
+  };
+
   const generateInvoice = (order: any) => {
     const doc = new jsPDF();
     
-    // Brand Header
     doc.setFontSize(24);
-    doc.setTextColor(219, 39, 119); // Tailwind Pink-600
+    doc.setTextColor(219, 39, 119); 
     doc.text("Bake With Joy", 14, 20);
     
     doc.setFontSize(12);
     doc.setTextColor(100, 100, 100);
     doc.text("Customer Invoice", 14, 28);
     
-    // Customer Details
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(12);
     doc.text(`Bill To: ${order.customerName}`, 14, 42);
     doc.text(`Date: ${new Date(order.date).toLocaleDateString()}`, 14, 48);
     
-    // The Pricing Table
     autoTable(doc, {
       startY: 56,
       headStyles: { fillColor: [219, 39, 119] },
@@ -97,13 +99,11 @@ export default function OrdersPage() {
       footStyles: { fillColor: [243, 244, 246], textColor: [0, 0, 0], fontStyle: 'bold' }
     });
     
-    // Footer message
     const finalY = (doc as any).lastAutoTable.finalY || 100;
     doc.setFontSize(10);
     doc.setTextColor(150, 150, 150);
     doc.text("Thank you for choosing Bake With Joy!", 14, finalY + 15);
     
-    // Save the file cleanly
     const safeName = order.customerName.replace(/[^a-zA-Z0-9]/g, '_');
     doc.save(`Invoice_${safeName}.pdf`);
   };
@@ -112,11 +112,10 @@ export default function OrdersPage() {
     <div className="p-6 max-w-md mx-auto font-sans">
       <h1 className="text-3xl font-bold mb-6 text-pink-600">Price Calculator</h1>
       
-      {/* The Calculator Form */}
       <form onSubmit={saveOrder} className="bg-white p-5 rounded-xl shadow-sm border border-gray-200 mb-8">
         <div className="mb-4">
           <label className="block text-sm font-semibold mb-1 text-gray-700">Customer / Event Name</label>
-          <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full border border-gray-300 p-2 rounded-lg" required placeholder="e.g. Sarah's Birthday" />
+          <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full border border-gray-300 p-2 rounded-lg bg-white" required placeholder="e.g. Sarah's Birthday" />
         </div>
 
         <div className="mb-4 border-b pb-4">
@@ -132,22 +131,22 @@ export default function OrdersPage() {
         <div className="flex gap-3 mb-4">
           <div className="flex-1">
             <label className="block text-sm font-semibold mb-1 text-gray-700">Labor Hours</label>
-            <input type="number" step="0.5" value={laborHours} onChange={(e) => setLaborHours(e.target.value)} className="w-full border border-gray-300 p-2 rounded-lg" placeholder="2.5" />
+            <input type="number" step="0.5" value={laborHours} onChange={(e) => setLaborHours(e.target.value)} className="w-full border border-gray-300 p-2 rounded-lg bg-white" placeholder="2.5" />
           </div>
           <div className="flex-1">
             <label className="block text-sm font-semibold mb-1 text-gray-700">Rate / Hr (Rs.)</label>
-            <input type="number" value={laborRate} onChange={(e) => setLaborRate(e.target.value)} className="w-full border border-gray-300 p-2 rounded-lg" />
+            <input type="number" value={laborRate} onChange={(e) => setLaborRate(e.target.value)} className="w-full border border-gray-300 p-2 rounded-lg bg-white" />
           </div>
         </div>
 
         <div className="flex gap-3 mb-4 border-b pb-4">
           <div className="flex-1">
             <label className="block text-sm font-semibold mb-1 text-gray-700">Box & Boards (Rs.)</label>
-            <input type="number" value={packagingCost} onChange={(e) => setPackagingCost(e.target.value)} className="w-full border border-gray-300 p-2 rounded-lg" placeholder="150" />
+            <input type="number" value={packagingCost} onChange={(e) => setPackagingCost(e.target.value)} className="w-full border border-gray-300 p-2 rounded-lg bg-white" placeholder="150" />
           </div>
           <div className="flex-1">
             <label className="block text-sm font-semibold mb-1 text-gray-700">Profit Margin %</label>
-            <input type="number" value={profitMargin} onChange={(e) => setProfitMargin(e.target.value)} className="w-full border border-gray-300 p-2 rounded-lg" />
+            <input type="number" value={profitMargin} onChange={(e) => setProfitMargin(e.target.value)} className="w-full border border-gray-300 p-2 rounded-lg bg-white" />
           </div>
         </div>
 
@@ -168,7 +167,6 @@ export default function OrdersPage() {
         </button>
       </form>
 
-      {/* The Order History & Invoice Section */}
       <div>
         <h2 className="text-xl font-bold mb-3 text-gray-800">Recent Orders</h2>
         {orderHistory.length === 0 ? (
@@ -182,7 +180,17 @@ export default function OrdersPage() {
                     <h3 className="font-bold text-lg text-gray-800">{order.customerName}</h3>
                     <p className="text-sm text-gray-500">{order.recipeName}</p>
                   </div>
-                  <span className="font-bold text-pink-600 text-lg">Rs. {order.finalPrice.toFixed(2)}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="font-bold text-pink-600 text-lg">Rs. {order.finalPrice.toFixed(2)}</span>
+                    {/* NEW: Delete Button */}
+                    <button 
+                      onClick={() => deleteOrder(order.id)}
+                      className="text-gray-400 hover:text-red-500 transition-colors"
+                      aria-label="Delete order"
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
                 </div>
                 <button 
                   onClick={() => generateInvoice(order)}

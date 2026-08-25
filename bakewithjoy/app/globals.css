@@ -2,9 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  /* This forces all input boxes to have dark text and a white background */
-  input, select, textarea {
-    @apply text-gray-900 bg-white;
-  }
+/* Force standard dark text and white background without using @apply */
+input, select, textarea {
+  color: #111827 !important; 
+  background-color: #ffffff !important;
 }

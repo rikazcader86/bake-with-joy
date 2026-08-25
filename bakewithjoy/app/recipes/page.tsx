@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
-import { collection, addDoc, onSnapshot } from "firebase/firestore";
+import { collection, addDoc, onSnapshot, doc, deleteDoc } from "firebase/firestore";
 import { db } from "../../firebase"; 
+import { Trash2, X } from "lucide-react"; // We added the X icon here
 
 export default function RecipesPage() {
   const [availableIngredients, setAvailableIngredients] = useState<any[]>([]);
@@ -43,6 +44,11 @@ export default function RecipesPage() {
     setCurrentQty("");
   };
 
+  // NEW: Remove an ingredient while building a recipe
+  const removeDraftItem = (indexToRemove: number) => {
+    setRecipeItems(recipeItems.filter((_, index) => index !== indexToRemove));
+  };
+
   const saveRecipe = async () => {
     if (!recipeName || recipeItems.length === 0) return;
 
@@ -58,6 +64,13 @@ export default function RecipesPage() {
     setRecipeItems([]);
   };
 
+  // NEW: Delete a fully saved recipe
+  const deleteRecipe = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this recipe?")) {
+      await deleteDoc(doc(db, "recipes", id));
+    }
+  };
+
   const currentTotalCost = recipeItems.reduce((sum: number, item: any) => sum + item.cost, 0);
 
   return (
@@ -69,7 +82,7 @@ export default function RecipesPage() {
           type="text" 
           value={recipeName} 
           onChange={(e) => setRecipeName(e.target.value)} 
-          className="w-full border border-gray-300 p-2 rounded-lg mb-4 font-bold text-lg" 
+          className="w-full border border-gray-300 p-2 rounded-lg mb-4 font-bold text-lg bg-white" 
           placeholder="Recipe Name (e.g., Vanilla Sponge)" 
         />
         
@@ -88,7 +101,7 @@ export default function RecipesPage() {
             type="number" 
             value={currentQty} 
             onChange={(e) => setCurrentQty(e.target.value)} 
-            className="w-20 border border-gray-300 p-2 rounded-lg" 
+            className="w-20 border border-gray-300 p-2 rounded-lg bg-white" 
             placeholder="Qty" 
           />
           <button type="submit" className="bg-gray-800 text-white px-4 rounded-lg font-bold">+</button>
@@ -99,9 +112,15 @@ export default function RecipesPage() {
             <h3 className="font-bold text-sm mb-2 text-gray-700">Ingredients in this recipe:</h3>
             <ul className="space-y-1 mb-3">
               {recipeItems.map((item: any, index: number) => (
-                 <li key={index} className="flex justify-between text-sm">
+                 <li key={index} className="flex justify-between text-sm items-center">
                    <span>{item.qty}{item.unit} {item.name}</span>
-                   <span className="text-gray-600">Rs. {item.cost.toFixed(2)}</span>
+                   <div className="flex items-center gap-2">
+                     <span className="text-gray-600">Rs. {item.cost.toFixed(2)}</span>
+                     {/* Button to remove a mistake while building */}
+                     <button type="button" onClick={() => removeDraftItem(index)} className="text-red-400 hover:text-red-600">
+                       <X size={16} />
+                     </button>
+                   </div>
                  </li>
               ))}
             </ul>
@@ -125,14 +144,24 @@ export default function RecipesPage() {
         {savedRecipes.length === 0 ? (
           <p className="text-gray-500 italic">No recipes yet. Build one above!</p>
         ) : (
-          <ul className="space-y-3">
+          <ul className="space-y-3 pb-8">
             {savedRecipes.map((recipe: any) => (
-              <li key={recipe.id} className="border p-4 rounded-lg bg-white shadow-sm">
-                <div className="flex justify-between items-center mb-2">
+              <li key={recipe.id} className="border p-4 rounded-lg bg-white shadow-sm flex flex-col">
+                <div className="flex justify-between items-start mb-2">
                   <h3 className="font-bold text-lg text-gray-800">{recipe.name}</h3>
-                  <span className="font-bold text-pink-600">Rs. {recipe.totalCost.toFixed(2)}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="font-bold text-pink-600">Rs. {recipe.totalCost.toFixed(2)}</span>
+                    {/* Button to delete the full saved recipe */}
+                    <button 
+                      onClick={() => deleteRecipe(recipe.id)}
+                      className="text-gray-400 hover:text-red-500 transition-colors"
+                      aria-label="Delete recipe"
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 pr-8">
                   {recipe.items.map((i: any) => `${i.qty}${i.unit} ${i.name}`).join(", ")}
                 </p>
               </li>

@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
-import { collection, addDoc, onSnapshot } from "firebase/firestore";
+import { collection, addDoc, onSnapshot, doc, deleteDoc } from "firebase/firestore";
 import { db } from "../firebase";
+import { Trash2 } from "lucide-react";
 
 const COMMON_INGREDIENTS = [
   "All-Purpose Flour",
@@ -69,6 +70,13 @@ export default function IngredientsPage() {
     setQty("");
   };
 
+  // NEW: Delete function with confirmation
+  const deleteIngredient = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this ingredient?")) {
+      await deleteDoc(doc(db, "ingredients", id));
+    }
+  };
+
   return (
     <div className="p-6 max-w-md mx-auto font-sans">
       <h1 className="text-3xl font-bold mb-6 text-pink-600">My Ingredients</h1>
@@ -76,7 +84,6 @@ export default function IngredientsPage() {
       <form onSubmit={addIngredient} className="mb-8 bg-pink-50 p-4 rounded-xl shadow-sm border border-pink-100">
         <div className="mb-3">
           <label className="block text-sm font-semibold mb-1 text-gray-700">Ingredient Name</label>
-          {/* We use an input with a 'list' attribute to link it to the datalist below */}
           <input 
             list="common-ingredients"
             type="text" 
@@ -86,7 +93,6 @@ export default function IngredientsPage() {
             placeholder="Select or type a new ingredient..."
             required 
           />
-          {/* The datalist holds our suggestions, but doesn't force you to pick them */}
           <datalist id="common-ingredients">
             {COMMON_INGREDIENTS.map((ing) => (
               <option key={ing} value={ing} />
@@ -124,8 +130,8 @@ export default function IngredientsPage() {
         ) : (
           <ul className="space-y-2 pb-8">
             {ingredients.map((item: any) => (
-              <li key={item.id} className="border p-3 rounded-lg flex justify-between items-center bg-white shadow-sm">
-                <div>
+              <li key={item.id} className="border p-3 rounded-lg flex items-center bg-white shadow-sm gap-3">
+                <div className="flex-1">
                   <p className="font-bold text-gray-800">{item.name}</p>
                   <p className="text-xs text-gray-500">Bought: {item.purchaseQty}{item.unit} for Rs. {item.purchasePrice}</p>
                 </div>
@@ -133,6 +139,14 @@ export default function IngredientsPage() {
                   <p className="font-bold text-pink-600">Rs. {item.costPerUnit.toFixed(2)}</p>
                   <p className="text-xs text-gray-500">per {item.unit}</p>
                 </div>
+                {/* NEW: Delete Button */}
+                <button 
+                  onClick={() => deleteIngredient(item.id)}
+                  className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                  aria-label="Delete ingredient"
+                >
+                  <Trash2 size={20} />
+                </button>
               </li>
             ))}
           </ul>

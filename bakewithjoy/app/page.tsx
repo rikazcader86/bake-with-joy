@@ -3,6 +3,35 @@ import { useState, useEffect } from "react";
 import { collection, addDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
 
+const COMMON_INGREDIENTS = [
+  "All-Purpose Flour",
+  "Cake Flour",
+  "White Sugar",
+  "Brown Sugar",
+  "Icing Sugar",
+  "Unsalted Butter",
+  "Salted Butter",
+  "Margarine",
+  "Eggs",
+  "Milk",
+  "Heavy Cream",
+  "Whipping Cream",
+  "Cocoa Powder",
+  "Baking Powder",
+  "Baking Soda",
+  "Vanilla Extract",
+  "Vanilla Essence",
+  "Salt",
+  "Vegetable Oil",
+  "Dark Chocolate",
+  "Milk Chocolate",
+  "White Chocolate",
+  "Fondant",
+  "Food Coloring",
+  "Almond Flour",
+  "Cream Cheese"
+].sort();
+
 export default function IngredientsPage() {
   const [ingredients, setIngredients] = useState<any[]>([]);
   const [name, setName] = useState("");
@@ -47,8 +76,24 @@ export default function IngredientsPage() {
       <form onSubmit={addIngredient} className="mb-8 bg-pink-50 p-4 rounded-xl shadow-sm border border-pink-100">
         <div className="mb-3">
           <label className="block text-sm font-semibold mb-1 text-gray-700">Ingredient Name</label>
-          <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full border border-gray-300 p-2 rounded-lg" placeholder="e.g. Flour" required />
+          {/* We use an input with a 'list' attribute to link it to the datalist below */}
+          <input 
+            list="common-ingredients"
+            type="text" 
+            value={name} 
+            onChange={(e) => setName(e.target.value)} 
+            className="w-full border border-gray-300 p-2 rounded-lg bg-white" 
+            placeholder="Select or type a new ingredient..."
+            required 
+          />
+          {/* The datalist holds our suggestions, but doesn't force you to pick them */}
+          <datalist id="common-ingredients">
+            {COMMON_INGREDIENTS.map((ing) => (
+              <option key={ing} value={ing} />
+            ))}
+          </datalist>
         </div>
+        
         <div className="flex gap-2 mb-4">
           <div className="flex-1">
             <label className="block text-sm font-semibold mb-1 text-gray-700">Price (Rs.)</label>
@@ -77,7 +122,7 @@ export default function IngredientsPage() {
         {ingredients.length === 0 ? (
           <p className="text-gray-500 italic">No ingredients added yet. Add your first one above!</p>
         ) : (
-          <ul className="space-y-2">
+          <ul className="space-y-2 pb-8">
             {ingredients.map((item: any) => (
               <li key={item.id} className="border p-3 rounded-lg flex justify-between items-center bg-white shadow-sm">
                 <div>

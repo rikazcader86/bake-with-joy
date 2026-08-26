@@ -6,8 +6,8 @@ export const metadata = {
   title: 'Bake With Joy',
   description: 'Cake costing and recipe management',
   icons: {
-    icon: '/logo.png',       // This changes the browser tab icon
-    apple: '/logo.png',      // This specifically tells iPhones/Androids to use this for the home screen
+    icon: '/logo.png',       
+    apple: '/logo.png',      
   },
 };
 
@@ -18,12 +18,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      {/* Added pt-16 to push the page content down below our new top bar */}
       <body className="bg-gray-50 pb-20 pt-16">
         
-        {/* NEW: Top Logo Bar */}
+        {/* Top Brand Name Bar (Text Instead of Logo) */}
         <div className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 h-14 flex items-center justify-center z-10">
-          <img src="/logo.png" alt="Bake With Joy" className="h-10 object-contain" />
+          <h1 className="text-xl font-bold text-pink-600 tracking-wide">Bake With Joy</h1>
         </div>
 
         {children}

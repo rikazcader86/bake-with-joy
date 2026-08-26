@@ -5,6 +5,10 @@ import { BookOpen, ShoppingBasket, ClipboardList } from 'lucide-react';
 export const metadata = {
   title: 'Bake With Joy',
   description: 'Cake costing and recipe management',
+  icons: {
+    icon: '/logo.png',       // This changes the browser tab icon
+    apple: '/logo.png',      // This specifically tells iPhones/Androids to use this for the home screen
+  },
 };
 
 export default function RootLayout({

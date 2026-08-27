@@ -1,6 +1,6 @@
 import './globals.css';
 import Link from 'next/link';
-import { BookOpen, ShoppingBasket, ClipboardList } from 'lucide-react';
+import { BookOpen, ShoppingBasket, ClipboardList, Wallet } from 'lucide-react';
 
 export const metadata = {
   title: 'Bake With Joy',
@@ -41,6 +41,10 @@ export default function RootLayout({
             <ClipboardList size={24} />
             <span className="text-xs mt-1 font-medium">Orders</span>
           </Link>
+          <Link href="/expenses" className="flex flex-col items-center text-gray-500 hover:text-pink-600 transition-colors">
+         <Wallet size={24} />
+         <span className="text-xs mt-1 font-medium">Expenses</span>
+       </Link>
         </div>
 
       </body>

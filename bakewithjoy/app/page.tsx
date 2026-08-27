@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { collection, addDoc, onSnapshot, doc, deleteDoc } from "firebase/firestore";
+import { collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { Trash2 } from "lucide-react";
 
@@ -61,6 +61,7 @@ export default function IngredientsPage() {
       name: name,
       purchasePrice: parseFloat(price),
       purchaseQty: parseFloat(qty),
+      currentQty: parseFloat(qty), // NEW: Tracks the live stock level
       unit: unit,
       costPerUnit: costPerUnit
     });
@@ -70,10 +71,20 @@ export default function IngredientsPage() {
     setQty("");
   };
 
-  // NEW: Delete function with confirmation
   const deleteIngredient = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this ingredient?")) {
       await deleteDoc(doc(db, "ingredients", id));
+    }
+  };
+
+  // NEW: Manual stock update function
+  const updateStock = async (id: string, currentStock: number) => {
+    const input = window.prompt("Update current stock to:", currentStock.toString());
+    if (input !== null && input.trim() !== "") {
+      const newQty = parseFloat(input);
+      if (!isNaN(newQty)) {
+        await updateDoc(doc(db, "ingredients", id), { currentQty: newQty });
+      }
     }
   };
 
@@ -128,25 +139,37 @@ export default function IngredientsPage() {
         {ingredients.length === 0 ? (
           <p className="text-gray-500 italic">No ingredients added yet. Add your first one above!</p>
         ) : (
-          <ul className="space-y-2 pb-8">
+          <ul className="space-y-4 pb-8">
             {ingredients.map((item: any) => (
-              <li key={item.id} className="border p-3 rounded-lg flex items-center bg-white shadow-sm gap-3">
-                <div className="flex-1">
-                  <p className="font-bold text-gray-800">{item.name}</p>
-                  <p className="text-xs text-gray-500">Bought: {item.purchaseQty}{item.unit} for Rs. {item.purchasePrice}</p>
+              <li key={item.id} className="border p-4 rounded-xl bg-white shadow-sm flex flex-col gap-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="font-bold text-gray-800">{item.name}</p>
+                    <p className="text-xs text-gray-500">Bought: {item.purchaseQty}{item.unit} for Rs. {item.purchasePrice}</p>
+                  </div>
+                  <div className="text-right flex items-center gap-3">
+                    <div>
+                      <p className="font-bold text-pink-600">Rs. {item.costPerUnit.toFixed(2)}</p>
+                      <p className="text-xs text-gray-500">per {item.unit}</p>
+                    </div>
+                    <button onClick={() => deleteIngredient(item.id)} className="text-gray-400 hover:text-red-500 transition-colors">
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-bold text-pink-600">Rs. {item.costPerUnit.toFixed(2)}</p>
-                  <p className="text-xs text-gray-500">per {item.unit}</p>
+                
+                {/* NEW: Inventory Tracker Row */}
+                <div className="bg-pink-50 rounded-lg p-3 flex justify-between items-center border border-pink-100">
+                  <span className="text-sm font-bold text-gray-700">
+                    In Stock: {item.currentQty !== undefined ? item.currentQty : item.purchaseQty} {item.unit}
+                  </span>
+                  <button 
+                    onClick={() => updateStock(item.id, item.currentQty !== undefined ? item.currentQty : item.purchaseQty)}
+                    className="text-xs bg-pink-500 text-white px-3 py-1.5 rounded-lg font-bold hover:bg-pink-600 transition-colors"
+                  >
+                    Update
+                  </button>
                 </div>
-                {/* NEW: Delete Button */}
-                <button 
-                  onClick={() => deleteIngredient(item.id)}
-                  className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                  aria-label="Delete ingredient"
-                >
-                  <Trash2 size={20} />
-                </button>
               </li>
             ))}
           </ul>

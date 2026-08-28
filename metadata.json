@@ -1,0 +1,6 @@
+{
+  "name": "Bake With Joy",
+  "description": "Cake costing, recipe management, order pricing, and expense tracking application",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

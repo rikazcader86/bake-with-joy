@@ -1,7 +1,0 @@
-@import "tailwindcss";
-
-/* This fixes the invisible text in dark mode */
-input, select, textarea {
-  color: #111827 !important; 
-  background-color: #ffffff !important;
-}

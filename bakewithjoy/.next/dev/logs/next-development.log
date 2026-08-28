@@ -1,0 +1,10 @@
+{"timestamp":"00:00:01.857","source":"Server","level":"LOG","message":""}
+{"timestamp":"00:00:26.651","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
+{"timestamp":"00:01:31.616","source":"Server","level":"ERROR","message":"⨯ Error: The default export is not a React Component in \"/recipes/layout\""}
+{"timestamp":"00:01:31.619","source":"Server","level":"ERROR","message":"⨯ Error: The default export is not a React Component in \"/recipes/layout\""}
+{"timestamp":"00:01:32.212","source":"Server","level":"ERROR","message":"⨯ Error: The default export is not a React Component in \"/recipes/layout\""}
+{"timestamp":"00:01:32.215","source":"Server","level":"ERROR","message":"⨯ Error: The default export is not a React Component in \"/recipes/layout\""}
+{"timestamp":"00:01:33.598","source":"Browser","level":"ERROR","message":"Uncaught Error: The default export is not a React Component in \"/recipes/layout\""}
+{"timestamp":"00:01:33.599","source":"Server","level":"ERROR","message":"[browser] \"\\u001b[31mUncaught Error: The default export is not a React Component in \\\"/recipes/layout\\\"\\u001b[39m\""}
+{"timestamp":"00:01:42.568","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
+{"timestamp":"00:02:42.413","source":"Server","level":"LOG","message":"✓ Compiled in 56ms"}
